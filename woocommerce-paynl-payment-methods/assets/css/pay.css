@@ -1,0 +1,107 @@
+#paynl_payment_methods-description ul {
+    width: 100%;
+}
+
+#paynl_payment_methods-description ul li {
+    display: inline-block;
+    width: 295px;
+    margin-right: 5px;
+}
+
+#paynl_payment_methods-description ul li a {
+    width: 100%;
+    display: inline-block;
+    color: #1d1d1d;
+    text-decoration: none;
+}
+
+#paynl_payment_methods-description ul li a .enabled {
+    margin-left: 5px;
+    color: #10723a;
+    font-weight: bold;
+}
+
+#paynl_payment_methods-description ul li a:hover {
+    color: #272fcf;
+    background: #00000012;
+}
+
+#paynl_payment_methods-description img {
+    position: relative;
+    vertical-align: middle;
+    margin-right: 10px;
+}
+
+.woocommerce table.form-table select.multiselect.countryLimit,
+.woocommerce table.form-table select.multiselect.shippingLimit {
+    height: 190px;
+}
+
+#FR_Email {
+    resize: none;
+    height: 42px;
+    padding: 10px;
+}
+
+#FR_Message {
+    resize: none;
+    padding: 10px;
+    height: 250px;
+}
+
+.FR_Error {
+    color: red;
+    font-size: 12px;
+    display: none;
+}
+
+#FR_Notices {
+    display: none;
+}
+
+
+.FR_Alertbox {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #00000069;
+    z-index: 9999;
+    display: none;
+}
+
+.FR_Alert {
+    position: fixed;
+    top: 25%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    padding: 15px 25px 20px 25px;
+    background: white;
+    border: 1px solid gray;
+    border-radius: 5px;
+    max-width: 90%;
+}
+
+.FR_Alert p {
+    font-size: 18px;
+}
+
+.FR_Alert .FR_close_alert {
+    background: #2271b1;
+    border-color: #2271b1;
+    color: #fff;
+    float: right;
+    cursor: pointer;
+    text-decoration: none;
+    text-shadow: none;
+    padding: 5px 15px;
+    font-size: 14px;
+    border-radius: 5px;
+}
+
+.paynl_advanced_settings_title {
+    position: absolute;
+    left: 0;
+}
