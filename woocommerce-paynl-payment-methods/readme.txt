@@ -4,9 +4,9 @@ Donate link: https://www.pay.nl/webshops/plugin-woocommerce
 Link: https://www.pay.nl
 Tags: paynl, paymentmethods, iDEAL, betaalmethoden, pay
 Requires at least: 3.5.1
-Stable tag: 3.19.3
+Stable tag: 3.19.4
 Tested up to: 6.6.2
-WC tested up to: 9.3.1
+WC tested up to: 9.3.3
 WC requires at least: 3.0
 Requires PHP: 7.0
 License: GPLv2
@@ -18,7 +18,7 @@ This plugin adds the Pay. Payment Methods to your WooCommerce installation.
 **Receive payments quickly, easily and securely via Pay.**
 
 *By installing this plugin you’ll be able to integrate the Pay. omnichannel payment methods for WooCommerce into your WooCommerce webshop.
-This will only take a few minutes. When the plugin is successfully installed your customers will be able to checkout their orders through payment options such as iDeal, PayPal, Creditcard and so on.*
+When the plugin is successfully installed your customers will be able to checkout their orders through payment options such as iDEAL, PayPal, Creditcard and so on.*
 
 **Behind every payment**
 Pay. is the payment service provider that makes online and offline selling easy and fun. A reliable and smart partner who processes hundreds of thousands of payments every day. All popular payment methods are available through Pay, as the company works hard to become the largest full-service omnichannel payment processor in the market.
@@ -59,12 +59,12 @@ Bank transfers and telephone payments are also possible...
 * Create **Paylinks** to send to your customer when manually creating orders
 * **Instore payments**; easily start card payments on your Pay. POS terminal (for example, for a self-service kiosk or click & collect)
 * **Easy (partial)refunds** straight from your WooCommerce backend
-* **Personal dashboard** for all your succesful transactions
+* **Personal dashboard** for all your successful transactions
 * **Pay. app** for your financial overview, always and everywhere! You can even start and receive payments via the app for your convenience; never miss a payment...
 
 To sign up, visit the registration page: [https://www.pay.nl/en/register-now](https://www.pay.nl/en/register-now)
 For more information about the payment solution packages and rates, go to [https://www.pay.nl/en/prices](https://www.pay.nl/en/prices)
-For any further questions please send an email to support@pay.nl
+For any further questions please email support@pay.nl
 
 == Installation ==
 
@@ -73,7 +73,7 @@ If you need more help, you can find our documentation [here](https://docs.pay.nl
 
 1. Install the plugin via Plugins -> new plugin
 2. Activate the plugin through the 'Plugins' menu in WordPress, the name of this plugin is: Pay. Payment Methods for WooCommerce
-3. Under WooCommerce -> Settings -> Payment, configure the apitoken and serviceid and activate the desired payment methods.
+3. Under WooCommerce -> Settings -> Payment, configure the API token and sales location and activate the desired payment methods.
 4. You can now accept payments using Pay.
 
 == Frequently Asked Questions ==
@@ -142,13 +142,12 @@ At the moment the plugin supports the following payment methods:
 * Online Bankbetaling
 * Parfum Cadeaukaart
 * Payconiq
-* Paypal
+* PayPal
 * Paysafecard
 * Phone payments
 * Podiumcadeaukaart
 * Postepay
 * Przelewy24
-* Riverty
 * Riverty
 * Shoes & Sneakers
 * Sodexo
@@ -189,6 +188,14 @@ Paid accounts have better tariffs! see: [tariffs](https://pay.nl/tarieven)
 8. One platform for all payments.
 
 == Changelog ==
+= 3.19.4 =
+Added Xafax Mynetpay
+Added Flying blue+
+Added Kunst & Cultuur Kaart
+Added Kids or teen
+Added MobilePAY
+Added Rotterdam Citycard
+Added Stadspas Amsterdam
 = 3.19.3 =
 Updated Riverty name and logo
 = 3.19.2 =
