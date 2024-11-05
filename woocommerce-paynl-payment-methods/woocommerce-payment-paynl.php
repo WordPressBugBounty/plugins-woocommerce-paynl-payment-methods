@@ -4,7 +4,7 @@
  * Plugin Name: Pay. Payment Methods for WooCommerce
  * Plugin URI: https://wordpress.org/plugins/woocommerce-paynl-payment-methods/
  * Description: Pay. Payment Methods for WooCommerce
- * Version: 3.19.4
+ * Version: 3.20.0
  * Author: Pay.
  * Author URI: https://www.pay.nl
  * Requires at least: 3.5.1
@@ -61,47 +61,50 @@ if (is_plugin_active('woocommerce/woocommerce.php') || is_plugin_active_for_netw
     PPMFWC_Gateways::ppmfwc_settingsTab();
 
     add_action('wp_enqueue_scripts', function () {
-        $blocks_js_route = PPMFWC_PLUGIN_URL . 'assets/js/paynl-blocks.js';
-        $gateways = WC()->payment_gateways()->payment_gateways();
-        $payGateways = [];
+        $post = get_post();
+        if (WC_Blocks_Utils::has_block_in_page($post->ID, 'woocommerce/checkout') === true || WC_Blocks_Utils::has_block_in_page($post->ID, 'woocommerce/cart') === true) {
+            $blocks_js_route = PPMFWC_PLUGIN_URL . 'assets/js/paynl-blocks.js';
+            $gateways = WC()->payment_gateways()->payment_gateways();
+            $payGateways = [];
 
-        $texts['issuer'] = __('Issuer', PPMFWC_WOOCOMMERCE_TEXTDOMAIN);
-        $texts['selectissuer'] = __('Select an issuer', PPMFWC_WOOCOMMERCE_TEXTDOMAIN);
-        $texts['enterbirthdate'] = __('Date of birth', PPMFWC_WOOCOMMERCE_TEXTDOMAIN);
-        $texts['enterCocNumber'] = __('COC number', PPMFWC_WOOCOMMERCE_TEXTDOMAIN);
-        $texts['requiredCocNumber'] = __('Please enter your COC number, this field is required.', PPMFWC_WOOCOMMERCE_TEXTDOMAIN);
-        $texts['enterVatNumber'] = __('VAT number', PPMFWC_WOOCOMMERCE_TEXTDOMAIN);
-        $texts['requiredVatNumber'] = __('Please enter your VAT number, this field is required.', PPMFWC_WOOCOMMERCE_TEXTDOMAIN);
-        $texts['dobRequired'] = __('Please enter your date of birth, this field is required.', PPMFWC_WOOCOMMERCE_TEXTDOMAIN);
+            $texts['issuer'] = __('Issuer', PPMFWC_WOOCOMMERCE_TEXTDOMAIN);
+            $texts['selectissuer'] = __('Select an issuer', PPMFWC_WOOCOMMERCE_TEXTDOMAIN);
+            $texts['enterbirthdate'] = __('Date of birth', PPMFWC_WOOCOMMERCE_TEXTDOMAIN);
+            $texts['enterCocNumber'] = __('COC number', PPMFWC_WOOCOMMERCE_TEXTDOMAIN);
+            $texts['requiredCocNumber'] = __('Please enter your COC number, this field is required.', PPMFWC_WOOCOMMERCE_TEXTDOMAIN);
+            $texts['enterVatNumber'] = __('VAT number', PPMFWC_WOOCOMMERCE_TEXTDOMAIN);
+            $texts['requiredVatNumber'] = __('Please enter your VAT number, this field is required.', PPMFWC_WOOCOMMERCE_TEXTDOMAIN);
+            $texts['dobRequired'] = __('Please enter your date of birth, this field is required.', PPMFWC_WOOCOMMERCE_TEXTDOMAIN);
 
-        foreach ($gateways as $gateway_id => $gateway) {
-            /** @var PPMFWC_Gateway_Abstract $gateway */
-            if (substr($gateway_id, 0, 11) != 'pay_gateway') {
-                continue;
+            foreach ($gateways as $gateway_id => $gateway) {
+                /** @var PPMFWC_Gateway_Abstract $gateway */
+                if (substr($gateway_id, 0, 11) != 'pay_gateway') {
+                    continue;
+                }
+                if ($gateway->enabled != 'yes') {
+                    continue;
+                }
+                $payGateways[] = array(
+                'paymentMethodId' => $gateway_id,
+                'title' => $gateway->get_title(),
+                'description' => $gateway->description,
+                'image_path' => $gateway->getIcon(),
+                'issuers' => $gateway->getIssuers(),
+                'issuersSelectionType' => $gateway->getSelectionType(),
+                'texts' => $texts,
+                'showbirthdate' => $gateway->askBirthdate(),
+                'birthdateRequired' => $gateway->birthdateRequired(),
+                'showVatField' => $gateway->showVat(),
+                'vatRequired' => $gateway->vatRequired(),
+                'showCocField' => $gateway->showCoc(),
+                'cocRequired' => $gateway->cocRequired()
+                );
             }
-            if ($gateway->enabled != 'yes') {
-                continue;
-            }
-            $payGateways[] = array(
-              'paymentMethodId' => $gateway_id,
-              'title' => $gateway->get_title(),
-              'description' => $gateway->description,
-              'image_path' => $gateway->getIcon(),
-              'issuers' => $gateway->getIssuers(),
-              'issuersSelectionType' => $gateway->getSelectionType(),
-              'texts' => $texts,
-              'showbirthdate' => $gateway->askBirthdate(),
-              'birthdateRequired' => $gateway->birthdateRequired(),
-              'showVatField' => $gateway->showVat(),
-              'vatRequired' => $gateway->vatRequired(),
-              'showCocField' => $gateway->showCoc(),
-              'cocRequired' => $gateway->cocRequired()
-            );
+            wp_enqueue_script('paynl-blocks-js', $blocks_js_route, array('wc-blocks-registry'), (string)time(), true);
+            wp_localize_script('paynl-blocks-js', 'paynl_gateways', $payGateways);
+            wp_register_style('paynl-blocks-style', PPMFWC_PLUGIN_URL . 'assets/css/paynl_blocks.css');
+            wp_enqueue_style('paynl-blocks-style');
         }
-        wp_enqueue_script('paynl-blocks-js', $blocks_js_route, array('wc-blocks-registry'), (string)time(), true);
-        wp_localize_script('paynl-blocks-js', 'paynl_gateways', $payGateways);
-        wp_register_style('paynl-blocks-style', PPMFWC_PLUGIN_URL . 'assets/css/paynl_blocks.css');
-        wp_enqueue_style('paynl-blocks-style');
     });
 
     # Add settings link on the plugin-page
@@ -129,6 +132,11 @@ if (is_plugin_active('woocommerce/woocommerce.php') || is_plugin_active_for_netw
         add_action('woocommerce_order_status_changed', 'ppmfwc_auto_functions', 10, 3);
     }
     add_action('woocommerce_order_item_add_action_buttons', 'ppmfwc_add_order_js', 10, 1);
+
+    add_action('wp_enqueue_scripts', array('PPMFWC_Hooks_FastCheckout_Buttons', 'ppmfwc_fast_checkout_css'));
+    add_action('woocommerce_widget_shopping_cart_buttons', array('PPMFWC_Hooks_FastCheckout_Buttons', 'ppmfwc_fast_checkout_mini_cart'), 30);
+    add_action('woocommerce_proceed_to_checkout', array('PPMFWC_Hooks_FastCheckout_Buttons', 'ppmfwc_fast_checkout_cart'), 30);
+    add_action('woocommerce_after_add_to_cart_button', array('PPMFWC_Hooks_FastCheckout_Buttons', 'ppmfwc_fast_checkout_product'), 30);
 } else {
     # WooCommerce seems to be inactive, show eror message
     add_action('admin_notices', 'ppmfwc_error_woocommerce_not_active');

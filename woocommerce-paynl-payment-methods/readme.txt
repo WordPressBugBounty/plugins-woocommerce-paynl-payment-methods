@@ -4,9 +4,9 @@ Donate link: https://www.pay.nl/webshops/plugin-woocommerce
 Link: https://www.pay.nl
 Tags: paynl, paymentmethods, iDEAL, betaalmethoden, pay
 Requires at least: 3.5.1
-Stable tag: 3.19.4
+Stable tag: 3.20.0
 Tested up to: 6.6.2
-WC tested up to: 9.3.3
+WC tested up to: 9.4.0
 WC requires at least: 3.0
 Requires PHP: 7.0
 License: GPLv2
@@ -59,7 +59,7 @@ Bank transfers and telephone payments are also possible...
 * Create **Paylinks** to send to your customer when manually creating orders
 * **Instore payments**; easily start card payments on your Pay. POS terminal (for example, for a self-service kiosk or click & collect)
 * **Easy (partial)refunds** straight from your WooCommerce backend
-* **Personal dashboard** for all your successful transactions
+* **Personal dashboard** for all your succesful transactions
 * **Pay. app** for your financial overview, always and everywhere! You can even start and receive payments via the app for your convenience; never miss a payment...
 
 To sign up, visit the registration page: [https://www.pay.nl/en/register-now](https://www.pay.nl/en/register-now)
@@ -188,6 +188,9 @@ Paid accounts have better tariffs! see: [tariffs](https://pay.nl/tarieven)
 8. One platform for all payments.
 
 == Changelog ==
+= 3.20.0 =
+Added fast checkout option for iDEAL
+Minor UTH updates
 = 3.19.4 =
 Added Xafax Mynetpay
 Added Flying blue+
