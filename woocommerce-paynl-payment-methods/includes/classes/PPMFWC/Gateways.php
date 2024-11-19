@@ -115,6 +115,7 @@ class PPMFWC_Gateways
         'PPMFWC_Gateway_Klarnakp',
         'PPMFWC_Gateway_Kunstencultuurkaart',
         'PPMFWC_Gateway_Maestro',
+        'PPMFWC_Gateway_Mastercard',
         'PPMFWC_Gateway_Minitixsms',
         'PPMFWC_Gateway_Mistercash',
         'PPMFWC_Gateway_Mobilepay',
@@ -143,6 +144,7 @@ class PPMFWC_Gateways
         'PPMFWC_Gateway_StadspasAmsterdam',
         'PPMFWC_Gateway_Tikkie',
         'PPMFWC_Gateway_Trustly',
+        'PPMFWC_Gateway_Visa',
         'PPMFWC_Gateway_Visamastercard',
         'PPMFWC_Gateway_Vvvgiftcard',
         'PPMFWC_Gateway_Webshopgiftcard',
@@ -649,7 +651,7 @@ class PPMFWC_Gateways
             );
             $addedSettings[] = array(
                 'name' => esc_html(__('API token', PPMFWC_WOOCOMMERCE_TEXTDOMAIN)),
-                'type' => 'password',
+                'type' => 'text',
                 'desc' => esc_html(
                     __(
                         'The API token used to communicate with the Pay. API, you can find your API token ',
@@ -657,6 +659,7 @@ class PPMFWC_Gateways
                     )
                 ) . '<a href="https://admin.pay.nl/company/tokens" target="api_token">' . esc_html(__('here', PPMFWC_WOOCOMMERCE_TEXTDOMAIN)) . '</a>',
                 'id' => 'paynl_apitoken',
+                'class' => 'obscuredInput',
             );
             $addedSettings[] = array(
                 'name' => esc_html(__('Sales Location *', PPMFWC_WOOCOMMERCE_TEXTDOMAIN)),
