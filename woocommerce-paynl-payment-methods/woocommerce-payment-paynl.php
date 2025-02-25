@@ -4,7 +4,7 @@
  * Plugin Name: Pay. Payment Methods for WooCommerce
  * Plugin URI: https://wordpress.org/plugins/woocommerce-paynl-payment-methods/
  * Description: Pay. Payment Methods for WooCommerce
- * Version: 3.20.3
+ * Version: 3.20.4
  * Author: Pay.
  * Author URI: https://www.pay.nl
  * Requires at least: 3.5.1
@@ -68,7 +68,7 @@ if (is_plugin_active('woocommerce/woocommerce.php') || is_plugin_active_for_netw
     });
 
     add_action('init', function () {
-        if (strpos($_SERVER['REQUEST_URI'], '/post.php') !== false && is_admin()) {
+        if ((strpos($_SERVER['REQUEST_URI'], '/post.php') !== false || strpos($_SERVER['REQUEST_URI'], '/post-new.php') !== false) && is_admin()) {
             ppmfwc_registerBlockScripts();
         }
     });
@@ -112,6 +112,9 @@ if (is_plugin_active('woocommerce/woocommerce.php') || is_plugin_active_for_netw
     add_action('woocommerce_widget_shopping_cart_buttons', array('PPMFWC_Hooks_FastCheckout_Buttons', 'ppmfwc_fast_checkout_mini_cart'), 30);
     add_action('woocommerce_proceed_to_checkout', array('PPMFWC_Hooks_FastCheckout_Buttons', 'ppmfwc_fast_checkout_cart'), 30);
     add_action('woocommerce_after_add_to_cart_button', array('PPMFWC_Hooks_FastCheckout_Buttons', 'ppmfwc_fast_checkout_product'), 30);
+    add_filter('woocommerce_email_recipient_customer_on_hold_order', array('PPMFWC_Hooks_Settings', 'ppmfwc_settings_email'), 10, 3);
+    add_filter('woocommerce_email_recipient_customer_processing_order', array('PPMFWC_Hooks_Settings', 'ppmfwc_settings_email'), 10, 3);
+    add_filter('woocommerce_email_recipient_customer_pending_order', array('PPMFWC_Hooks_Settings', 'ppmfwc_settings_email'), 10, 3);
     add_action('wp_enqueue_scripts', array('PPMFWC_Hooks_FastCheckout_Buttons', 'ppmfwc_fast_checkout_blocks_cart'));
     add_action('wp_enqueue_scripts', array('PPMFWC_Hooks_FastCheckout_Buttons', 'ppmfwc_fast_checkout_modal'));
 } else {
@@ -119,6 +122,10 @@ if (is_plugin_active('woocommerce/woocommerce.php') || is_plugin_active_for_netw
     add_action('admin_notices', 'ppmfwc_error_woocommerce_not_active');
 }
 
+/**
+ * Register block scripts
+ * @return void
+ */
 function ppmfwc_registerBlockScripts()
 {
     $blocks_js_route = PPMFWC_PLUGIN_URL . 'assets/js/paynl-blocks.js';
@@ -203,11 +210,11 @@ function ppmfwc_plugin_add_settings_link($links)
 function ppmfwc_vatField($checkout)
 {
     woocommerce_form_field('vat_number', array(
-    'type' => 'text',
-    'class' => array('vat-number-field form-row-wide'),
-    'label' => esc_html(__('VAT number', PPMFWC_WOOCOMMERCE_TEXTDOMAIN)),
-    'placeholder' => esc_html(__('Enter your VAT number', PPMFWC_WOOCOMMERCE_TEXTDOMAIN)),
-    'required' => (get_option('paynl_show_vat_number') == 'yes_required'),
+        'type' => 'text',
+        'class' => array('vat-number-field form-row-wide'),
+        'label' => esc_html(__('VAT number', PPMFWC_WOOCOMMERCE_TEXTDOMAIN)),
+        'placeholder' => esc_html(__('Enter your VAT number', PPMFWC_WOOCOMMERCE_TEXTDOMAIN)),
+        'required' => (get_option('paynl_show_vat_number') == 'yes_required'),
     ), $checkout->get_value('vat_number'));
 }
 
@@ -240,7 +247,7 @@ function ppmfwc_payScript()
                         $scriptsAdded[] = 'ppmfwc_checkout_script';
                     }
                     if (!empty($gateway->settings['applepay_detection']) && $gateway->settings['applepay_detection'] == 'yes' && !in_array('ppmfwc_applepay_script', $scriptsAdded)) {
-                    //Register the Apple Pay Detection javascript
+                        //Register the Apple Pay Detection javascript
                         wp_register_script('ppmfwc_applepay_script', PPMFWC_PLUGIN_URL . 'assets/js/applepay.js', array('jquery'), '1.0', true);
                         wp_enqueue_script('ppmfwc_applepay_script');
                         $scriptsAdded[] = 'ppmfwc_applepay_script';
@@ -259,11 +266,11 @@ function ppmfwc_payScript()
 function ppmfwc_cocField($checkout)
 {
     woocommerce_form_field('coc_number', array(
-    'type' => 'text',
-    'class' => array('coc-number-field form-row-wide'),
-    'label' => esc_html(__('COC number', PPMFWC_WOOCOMMERCE_TEXTDOMAIN)),
-    'placeholder' => esc_html(__('Enter your COC number', PPMFWC_WOOCOMMERCE_TEXTDOMAIN)),
-    'required' => (get_option('paynl_show_coc_number') == 'yes_required'),
+        'type' => 'text',
+        'class' => array('coc-number-field form-row-wide'),
+        'label' => esc_html(__('COC number', PPMFWC_WOOCOMMERCE_TEXTDOMAIN)),
+        'placeholder' => esc_html(__('Enter your COC number', PPMFWC_WOOCOMMERCE_TEXTDOMAIN)),
+        'required' => (get_option('paynl_show_coc_number') == 'yes_required'),
     ), $checkout->get_value('coc_number'));
 }
 
