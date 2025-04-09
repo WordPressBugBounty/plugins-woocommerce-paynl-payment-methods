@@ -586,6 +586,20 @@ class PPMFWC_Gateways
                 'id' => 'paynl_custom_failover_gateway',
             );
             $addedSettings[] = array(
+                'name' => __('Customer IP', PPMFWC_WOOCOMMERCE_TEXTDOMAIN),
+                'type' => 'select',
+                'options' => array(
+                    'default' => esc_html(__('Default (Pay. SDK)', PPMFWC_WOOCOMMERCE_TEXTDOMAIN)),
+                    'orderremoteaddress' => esc_html(__('WooCommerce Order IP', PPMFWC_WOOCOMMERCE_TEXTDOMAIN)),
+                    'httpforwarded' => esc_html(__('HTTP forwarded', PPMFWC_WOOCOMMERCE_TEXTDOMAIN)),
+                    'remoteaddress' => esc_html(__('Remote address', PPMFWC_WOOCOMMERCE_TEXTDOMAIN)),
+                ),
+                'desc' => esc_html(__('Choose how customer IP is determined.', PPMFWC_WOOCOMMERCE_TEXTDOMAIN)),
+                'desc_tip' => __('This setting allows you to define which customer IP is sent to Pay when initiating a transaction. If the default IP address doesn\'t work as expected, you can manually select an alternative here.', PPMFWC_WOOCOMMERCE_TEXTDOMAIN),
+                'id' => 'paynl_customer_ip',
+                'default' => 'default',
+            );
+            $addedSettings[] = array(
                 'name' => esc_html(__('SSL verification', PPMFWC_WOOCOMMERCE_TEXTDOMAIN)),
                 'type' => 'checkbox',
                 'desc' => esc_html(__('Enabled by default for secure communications. Strongly recommended to leave this enabled, unless otherwise advised by Pay. Support.', PPMFWC_WOOCOMMERCE_TEXTDOMAIN)), // phpcs:ignore
@@ -725,10 +739,23 @@ class PPMFWC_Gateways
     {
         add_action('admin_enqueue_scripts', array(__CLASS__, 'ppmfwc_addPayStyleSheet'));
         add_action('admin_enqueue_scripts', array(__CLASS__, 'ppmfwc_addPayJavascript'));
+        add_action('admin_enqueue_scripts', array(__CLASS__, 'enqueue_custom_admin_js'));
         add_filter('woocommerce_settings_tabs_array', array(__CLASS__, 'ppmfwc_addSettingsTab'), 50);
         add_action('woocommerce_sections_' . self::TAB_ID, array(__CLASS__, 'ppmfwc_addSettingsSections'));
         add_action('woocommerce_settings_' . self::TAB_ID, array(__CLASS__, 'ppmfwc_addGlobalSettingsTab'), 10);
         add_action('woocommerce_settings_save_' . self::TAB_ID, array(__CLASS__, 'ppmfwc_saveGlobalSettingsTab'), 10);
+    }
+
+
+    /**
+     * @return void
+     */
+    public static function enqueue_custom_admin_js()
+    {
+        $section = PPMFWC_Helper_Data::getRequestArg('section') ?? null;
+        if ($section == 'pay_gateway_instore') {
+            wp_enqueue_script('custom-admin-script', PPMFWC_PLUGIN_URL . 'assets/js/instore_setting.js', array('jquery'), PPMFWC_Helper_Data::getVersion(), true);
+        }
     }
 
     /**
@@ -742,6 +769,7 @@ class PPMFWC_Gateways
         add_action('woocommerce_api_wc_pay_gateway_featurerequest', array(__CLASS__, 'ppmfwc_onFeatureRequest'));
         add_action('woocommerce_api_wc_pay_gateway_pinrefund', array(__CLASS__, 'ppmfwc_onPinRefund'));
         add_action('woocommerce_api_wc_pay_gateway_fccreate', array('PPMFWC_Hooks_FastCheckout_Start', 'ppmfwc_onFastCheckoutOrderCreate'));
+        add_action('woocommerce_api_wc_pay_gateway_pintransaction', array(__CLASS__, 'ppmfwc_onPinRefund'));
     }
 
     /**
