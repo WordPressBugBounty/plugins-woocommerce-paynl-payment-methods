@@ -4,7 +4,7 @@
  * Plugin Name: Pay. Payment Methods for WooCommerce
  * Plugin URI: https://wordpress.org/plugins/woocommerce-paynl-payment-methods/
  * Description: Pay. Payment Methods for WooCommerce
- * Version: 3.21.0
+ * Version: 3.21.1
  * Author: Pay.
  * Author URI: https://www.pay.nl
  * Requires at least: 3.5.1
@@ -389,7 +389,7 @@ function ppmfwc_add_order_js($order)
                 $instoreGateway = $payment_gateways->payment_gateways()['pay_gateway_instore'];
 
                 if (!empty($transactionLocalDB)) {
-                    # A Pay. transaction exists, therefore show the button for the retourpin option
+                    # A Pay. transaction exists, therefore, show the button for the retourpin option
                     $texts = array(
                         'i18n_refund_error_zero' => __("Refund amount must be greater than €0.00", PPMFWC_WOOCOMMERCE_TEXTDOMAIN),
                         'i18n_refund_invalid' => __('Invalid refund amount', 'woocommerce'),
