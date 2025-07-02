@@ -244,8 +244,9 @@ class PPMFWC_Helper_Transaction
             case PPMFWC_Gateways::STATUS_AUTHORIZE:
             case PPMFWC_Gateways::STATUS_SUCCESS:
                 # Check the amount
-                if (!in_array($order->get_total(), $transactionPaid)) {
-                    $order->update_status('on-hold', sprintf(__("Validation error: Paid amount does not match order amount. \npaidAmount: %s, \norderAmount: %s\n", PPMFWC_WOOCOMMERCE_TEXTDOMAIN), implode(' / ', $transactionPaid), $order->get_total())); // phpcs:ignore
+                $roundTotal = round($order->get_total(), 2);
+                if (!in_array($roundTotal, $transactionPaid)) {
+                    $order->update_status('on-hold', sprintf(__("Validation error: Paid amount does not match order amount. \npaidAmount: %s, \norderAmount: %s\n", PPMFWC_WOOCOMMERCE_TEXTDOMAIN), implode(' / ', $transactionPaid), $roundTotal)); // phpcs:ignore
                 } else {
 
                     if (PPMFWC_Hooks_FastCheckout_Exchange::isPaymentBasedCheckout($params)) {
@@ -395,9 +396,9 @@ class PPMFWC_Helper_Transaction
     {
         try {
             $response = self::sendRequest('https://connect.pay.nl/v1/orders/' . $transactionId . '/status',
-                null,
                 get_option('paynl_tokencode'),
                 get_option('paynl_apitoken'),
+                null,
                 'GET');
 
             return new PPMFWC_Model_PayOrder($response);
@@ -411,14 +412,14 @@ class PPMFWC_Helper_Transaction
 
     /**
      * @param $requestUrl
-     * @param $payload
      * @param $tokenCode
      * @param $apiToken
+     * @param $payload
      * @param string $method
-     * @return array
+     * @return mixed
      * @throws Exception
      */
-    public static function sendRequest($requestUrl, $payload = null, $tokenCode, $apiToken, string $method = 'POST')
+    public static function sendRequest($requestUrl, $tokenCode, $apiToken, $payload = null, string $method = 'POST')
     {
         $authorization = base64_encode($tokenCode . ':' . $apiToken);
 
