@@ -244,9 +244,9 @@ class PPMFWC_Helper_Transaction
             case PPMFWC_Gateways::STATUS_AUTHORIZE:
             case PPMFWC_Gateways::STATUS_SUCCESS:
                 # Check the amount
-                $roundTotal = round($order->get_total(), 2);
-                if (!in_array($roundTotal, $transactionPaid)) {
-                    $order->update_status('on-hold', sprintf(__("Validation error: Paid amount does not match order amount. \npaidAmount: %s, \norderAmount: %s\n", PPMFWC_WOOCOMMERCE_TEXTDOMAIN), implode(' / ', $transactionPaid), $roundTotal)); // phpcs:ignore
+                $skipAmountValidation = get_option('paynl_verify_amount') == 'yes';
+                if (!$skipAmountValidation && !in_array($order->get_total(), $transactionPaid)) {
+                    $order->update_status('on-hold', sprintf(__("Validation error: Paid amount does not match order amount. \npaidAmount: %s, \norderAmount: %s\n", PPMFWC_WOOCOMMERCE_TEXTDOMAIN), implode(' / ', $transactionPaid), $order->get_total())); // phpcs:ignore
                 } else {
 
                     if (PPMFWC_Hooks_FastCheckout_Exchange::isPaymentBasedCheckout($params)) {
@@ -340,7 +340,9 @@ class PPMFWC_Helper_Transaction
                 if (get_option('paynl_externalrefund') == "yes") {
                     PPMFWC_Helper_Data::ppmfwc_payLogger('Changing order state to `refunded`', $transactionId);
                     $order->set_status('refunded');
-                    wc_increase_stock_levels($orderId);
+                    if (get_option('paynl_exclude_restock') != "yes") {
+                        wc_increase_stock_levels($orderId);
+                    }
                     $order->save();
                 }
                 break;
@@ -352,7 +354,9 @@ class PPMFWC_Helper_Transaction
                 }
                 PPMFWC_Helper_Data::ppmfwc_payLogger('Changing order state to `chargeback`', $transactionId);
                 $order->set_status($status, 'Pay. Chargeback. Reason: "' . PPMFWC_Helper_Data::getRequestArg('external_reason_description') . '".');
-                wc_increase_stock_levels($orderId);
+                if (get_option('paynl_exclude_restock') != "yes") {
+                    wc_increase_stock_levels($orderId);
+                }
                 $order->save();
                 break;
 
@@ -477,7 +481,9 @@ class PPMFWC_Helper_Transaction
         }
         if (PPMFWC_Helper_Data::getRequestArg('amount') == $order->get_remaining_refund_amount()) {
             $order->set_status('refunded');
-            wc_increase_stock_levels($orderId);
+            if (get_option('paynl_exclude_restock') != "yes") {
+                wc_increase_stock_levels($orderId);
+            }
         }
         $order->save();
     }

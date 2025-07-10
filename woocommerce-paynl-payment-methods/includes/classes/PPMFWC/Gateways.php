@@ -513,6 +513,13 @@ class PPMFWC_Gateways
                 'id' => 'paynl_externalrefund',
                 'default' => 'no',
             );
+             $addedSettings[] = array(
+                'name' => __('Stock', PPMFWC_WOOCOMMERCE_TEXTDOMAIN),
+                'type' => 'checkbox',
+                'desc' => esc_html(__("Exclude stock updates for refunds and retourpin transaction", PPMFWC_WOOCOMMERCE_TEXTDOMAIN)),
+                'id' => 'paynl_exclude_restock',
+                'default' => 'no',
+            );
             $addedSettings[] = array(
                 'name' => esc_html(__('Auto capture', PPMFWC_WOOCOMMERCE_TEXTDOMAIN)),
                 'type' => 'checkbox',
@@ -616,6 +623,13 @@ class PPMFWC_Gateways
                 'desc_tip' => __('This setting allows you to define which customer IP is sent to Pay when initiating a transaction. If the default IP address doesn\'t work as expected, you can manually select an alternative here.', PPMFWC_WOOCOMMERCE_TEXTDOMAIN),
                 'id' => 'paynl_customer_ip',
                 'default' => 'default',
+            );
+            $addedSettings[] = array(
+                'name' => esc_html(__('Skip Amount Validation', PPMFWC_WOOCOMMERCE_TEXTDOMAIN)),
+                'type' => 'checkbox',
+                'desc' => esc_html(__('Enable this option if your product prices have more than two decimal places. This will skip the exact amount match check between WooCommerce and Pay. to prevent rounding errors.', PPMFWC_WOOCOMMERCE_TEXTDOMAIN)), // phpcs:ignore
+                'id' => 'paynl_verify_amount',
+                'default' => 'no',
             );
             $addedSettings[] = array(
                 'name' => esc_html(__('SSL verification', PPMFWC_WOOCOMMERCE_TEXTDOMAIN)),
