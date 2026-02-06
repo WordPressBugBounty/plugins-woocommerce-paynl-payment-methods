@@ -12,18 +12,6 @@
 
 class PPMFWC_Hooks_FastCheckout_Exchange
 {
-    /**
-     * @param array $params
-     * @return boolean
-     * @phpcs:disable Squiz.Commenting.FunctionComment.TypeHintMissing
-     */
-    public static function isPaymentBasedCheckout($params)
-    {
-        $type = $params['type'] ?? '';
-        $checkoutData = $params['checkoutData'] ?? '';
-
-        return $type == 'payment_based_checkout' && !empty($checkoutData);
-    }
 
     /**
      * Adds billing and shipping address information to the given order based on provided checkout data.
@@ -33,7 +21,7 @@ class PPMFWC_Hooks_FastCheckout_Exchange
      * @return void
      * @phpcs:disable Squiz.Commenting.FunctionComment.TypeHintMissing
      */
-    public static function addAddressToOrder(array $checkoutData, $order)
+    public static function addAddressToOrder(array $checkoutData, object $order)
     {
         $customerData = $checkoutData['customer'] ?? null;
         $billingAddressData = $checkoutData['billingAddress'] ?? null;
@@ -45,7 +33,7 @@ class PPMFWC_Hooks_FastCheckout_Exchange
             'company' => $customerData['company'] ?? '',
             'email' => $customerData['email'] ?? '',
             'phone' => $customerData['phone'] ?? '',
-            'address_1' => $billingAddressData['streetName'] . ' ' . $shippingAddressData['streetNumber'] . $shippingAddressData['streetNumberAddition'],
+            'address_1' => ($billingAddressData['streetName'] ?? '') . ' ' . ($billingAddressData['streetNumber'] ?? '') . ($billingAddressData['streetNumberAddition'] ?? ''),
             'address_2' => '',
             'city' => $billingAddressData['city'] ?? '',
             'state' => '',
@@ -59,7 +47,7 @@ class PPMFWC_Hooks_FastCheckout_Exchange
             'company' => $customerData['company'] ?? '',
             'email' => $customerData['email'] ?? '',
             'phone' => $customerData['phone'] ?? '',
-            'address_1' => $shippingAddressData['streetName'] . ' ' . $shippingAddressData['streetNumber'] . $shippingAddressData['streetNumberAddition'],
+            'address_1' => ($shippingAddressData['streetName'] ?? '') . ' ' . ($shippingAddressData['streetNumber'] ?? '') . ($shippingAddressData['streetNumberAddition'] ?? ''),
             'address_2' => '',
             'city' => $shippingAddressData['city'] ?? '',
             'state' => '',
