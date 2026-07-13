@@ -4,9 +4,9 @@ Donate link: https://www.pay.nl/webshops/plugin-woocommerce
 Link: https://www.pay.nl
 Tags: paynl, paymentmethods, iDEAL, betaalmethoden, pay
 Requires at least: 6.1.0
-Stable tag: 4.0.11
+Stable tag: 4.0.12
 Tested up to: 7.0.0
-WC tested up to: 10.7.0
+WC tested up to: 10.8.1
 WC requires at least: 6.5
 Requires PHP: 8.1
 License: GPLv2
@@ -188,6 +188,10 @@ Paid accounts have better tariffs! see: [tariffs](https://pay.nl/tarieven)
 8. One platform for all payments.
 
 == Changelog ==
+= 4.0.12 =
+Added option to hash IBAN information
+Enabled adding a range of IP addresses for test payments
+Added payment method Energieloket Cadeaukaart
 = 4.0.11 =
 Fixed setting locale attribute
 Allow empty payment method descriptions

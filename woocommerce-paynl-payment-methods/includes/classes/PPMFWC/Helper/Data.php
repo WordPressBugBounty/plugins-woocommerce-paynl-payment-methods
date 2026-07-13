@@ -125,14 +125,35 @@ class PPMFWC_Helper_Data
         $ip = self::getIp();
         $ipConfig = get_option('paynl_test_ipadress');
         if (!empty($ipConfig)) {
+            $ipConfig = preg_replace('/\s+/', '', $ipConfig);
             $allowed_ips = explode(',', $ipConfig);
             if (
-                in_array($ip, $allowed_ips) &&
                 filter_var($ip, FILTER_VALIDATE_IP) &&
                 strlen($ip) > 0 &&
                 count($allowed_ips) > 0
             ) {
-                return true;
+                if (in_array($ip, $allowed_ips)) {
+                    return true;                
+                } else {
+                    foreach ($allowed_ips as $allowed_ip) {
+                        $allowed_ip = trim($allowed_ip);
+                        if (strpos($allowed_ip, '/') !== false) {
+                            list($start_ip, $end_suffix) = explode('/', $allowed_ip);
+
+                            $ip_parts = explode('.', $start_ip);
+                            $ip_parts[3] = $end_suffix;
+                            $end_ip = implode('.', $ip_parts);
+
+                            $current_long = ip2long($ip);
+                            $start_long = ip2long($start_ip);
+                            $end_long = ip2long($end_ip);
+
+                            if ($current_long >= $start_long && $current_long <= $end_long) {
+                                return true;
+                            }
+                        }
+                    }
+                }
             }
         }
         return false;
@@ -154,17 +175,18 @@ class PPMFWC_Helper_Data
         $wpdb->query('DELETE FROM `' . $table_name_option_subs . '`');
         $wpdb->query('DELETE FROM `' . $table_name_options . '`');
 
-        foreach ($paymentOptions as $method)
-        {
-            if (file_exists(PPMFWC_PLUGIN_PATH . 'assets/cache' . $method->getImage())) {
-                $image = PPMFWC_PLUGIN_URL . 'assets/cache' . $method->getImage();
-            } else {
-                $image = 'https://static.pay.nl/' . $method->getImage();
-            }
+        if (is_array($paymentOptions)) {
+            foreach ($paymentOptions as $method) {
+                if (file_exists(PPMFWC_PLUGIN_PATH . 'assets/cache' . $method->getImage())) {
+                    $image = PPMFWC_PLUGIN_URL . 'assets/cache' . $method->getImage();
+                } else {
+                    $image = 'https://static.pay.nl/' . $method->getImage();
+                }
 
-            $sql = 'INSERT INTO `' . $table_name_options . '` (id,name,image,update_date) VALUES (%d,%s,%s,%s) ON DUPLICATE KEY UPDATE name = %s, image = %s, update_date = %s';
-            $sql = $wpdb->prepare($sql, $method->getId(), $method->getName(), $image, current_time('mysql'), $method->getName(), $image, current_time('mysql'));
-            $wpdb->query($sql);
+                $sql = 'INSERT INTO `' . $table_name_options . '` (id,name,image,update_date) VALUES (%d,%s,%s,%s) ON DUPLICATE KEY UPDATE name = %s, image = %s, update_date = %s';
+                $sql = $wpdb->prepare($sql, $method->getId(), $method->getName(), $image, current_time('mysql'), $method->getName(), $image, current_time('mysql'));
+                $wpdb->query($sql);
+            }
         }
     }
 
@@ -301,7 +323,7 @@ class PPMFWC_Helper_Data
      */
     public static function getVersion()
     {
-        return '4.0.11';
+        return '4.0.12';
     }
 
     /**

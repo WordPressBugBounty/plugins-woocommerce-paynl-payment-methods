@@ -109,7 +109,8 @@ class PPMFWC_Gateways
         'PPMFWC_Gateway_Dankort',
         'PPMFWC_Gateway_DeCadeaukaart',
         'PPMFWC_Gateway_Dinerbon',
-        'PPMFWC_Gateway_Doenkado',
+        'PPMFWC_Gateway_Doenkado',        
+        'PPMFWC_Gateway_EnergieloketCadeaukaart',
         'PPMFWC_Gateway_Eps',
         'PPMFWC_Gateway_Fashioncheque',
         'PPMFWC_Gateway_FashionChequeBeauty',
@@ -635,7 +636,7 @@ class PPMFWC_Gateways
             $addedSettings[] = array(
                 'name' => esc_html(__('Test IP address', PPMFWC_WOOCOMMERCE_TEXTDOMAIN)),
                 'type' => 'text',
-                'desc' => esc_html(__('Transactions started from these IP addresses will use testmode. Comma separate IPs for multiple inputs', PPMFWC_WOOCOMMERCE_TEXTDOMAIN)) . '<br/>' . esc_html(__('Current IP address:', PPMFWC_WOOCOMMERCE_TEXTDOMAIN)) . PPMFWC_Helper_Data::getIp(), // phpcs:ignore
+                'desc' => esc_html(__('Transactions started from these IP addresses will use testmode. Comma separate IPs for multiple inputs, use / for a range of IPs: 10.0.0.0/24.', PPMFWC_WOOCOMMERCE_TEXTDOMAIN)) . '<br/>' . esc_html(__('Current IP address:', PPMFWC_WOOCOMMERCE_TEXTDOMAIN)) . PPMFWC_Helper_Data::getIp(), // phpcs:ignore
                 'id' => 'paynl_test_ipadress',
             );
             $addedSettings[] = array(
@@ -707,6 +708,13 @@ class PPMFWC_Gateways
               'default' => 'no',
             );
 
+            $addedSettings[] = array(
+              'name' => __('Hash customer IBAN', PPMFWC_WOOCOMMERCE_TEXTDOMAIN),
+              'type' => 'checkbox',
+              'desc' => esc_html(__("Enable hashing of customer IBAN for added security. Disabling this setting later will not unhash previously processed IBANs.", PPMFWC_WOOCOMMERCE_TEXTDOMAIN)),
+              'id' => 'paynl_hash_iban',
+              'default' => 'no',
+            );
 
             $addedSettings[] = array(
                 'type' => 'sectionend',
