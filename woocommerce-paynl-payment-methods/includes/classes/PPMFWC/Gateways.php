@@ -29,6 +29,7 @@ class PPMFWC_Gateways
     const ACTION_NEWPPT = 'new_ppt';
     const ACTION_PENDING = 'pending';
     const ACTION_CANCEL = 'cancel';
+    const ACTION_FAILURE = 'failure';
     const ACTION_VERIFY = 'verify';
     const ACTION_REFUND = 'refund:received';
     const ACTION_REFUND_ADD = 'refund:add';
@@ -88,6 +89,7 @@ class PPMFWC_Gateways
         'PPMFWC_Gateway_Biercheque',
         'PPMFWC_Gateway_Biller',
         'PPMFWC_Gateway_Billink',
+        'PPMFWC_Gateway_Billinkfactoring',
         'PPMFWC_Gateway_Bioscoopbon',
         'PPMFWC_Gateway_Bizum',
         'PPMFWC_Gateway_Blik',
@@ -99,6 +101,7 @@ class PPMFWC_Gateways
         'PPMFWC_Gateway_Capayable',
         'PPMFWC_Gateway_CapayableGespreid',
         'PPMFWC_Gateway_Cartebleue',
+        'PPMFWC_Gateway_CashbackXL',
         'PPMFWC_Gateway_Clickandbuy',
         'PPMFWC_Gateway_CreditClick',
         'PPMFWC_Gateway_Cashly',
@@ -164,6 +167,7 @@ class PPMFWC_Gateways
         'PPMFWC_Gateway_Postepay',
         'PPMFWC_Gateway_RotterdamCitycard',
         'PPMFWC_Gateway_Rvrpas',
+        'PPMFWC_Gateway_SASEurobonus',
         'PPMFWC_Gateway_Satispay',
         'PPMFWC_Gateway_Saunaandwellnesscadeaukaart',
         'PPMFWC_Gateway_Scholierenpas',
@@ -868,6 +872,9 @@ class PPMFWC_Gateways
         add_action('woocommerce_api_wc_pay_gateway_pinrefund', array(__CLASS__, 'ppmfwc_onPinRefund'));
         add_action('woocommerce_api_wc_pay_gateway_retourpinreturn', array(__CLASS__, 'ppmfwc_retourpinReturn'));
         add_action('woocommerce_api_wc_pay_gateway_fccreate', array('PPMFWC_Hooks_FastCheckout_Start', 'ppmfwc_onFastCheckoutOrderCreate'));
+
+        add_action('woocommerce_api_wc_pay_gateway_paypartssession', array('PPMFWC_Hooks_PayParts_Session', 'ppmfwc_onPayPartsSessionCreate'));        
+        add_action('woocommerce_api_wc_pay_gateway_paypartsordercreate', array('PPMFWC_Hooks_PayParts_Order', 'ppmfwc_onPayPartsOrderCreate'));
     }
 
     /**
@@ -894,12 +901,29 @@ class PPMFWC_Gateways
         try {
             # Retrieve URL to continue (and update status if necessary)
             if (!empty($orderId)) {
+           
                 try {
-                    $transactionLocalDB = PPMFWC_Helper_Transaction::getTransaction($orderId);
-                    if (!$transactionLocalDB || empty($transactionLocalDB['order_id'])) {
-                        throw new PPMFWC_Exception_Notice('Could not find local transaction for order ' . $orderId);
+                    $payPartsOrders = [];
+                    if (WC()->session) {
+                        $payPartsOrders = WC()->session->get('payparts_orders', []);
                     }
-                    $order = new WC_Order($transactionLocalDB['order_id']);
+                    if (isset($payPartsOrders[$orderId])) {
+                        # PayParts flow return
+                        $order = wc_get_order($orderId);
+                    } else {
+                        # Normal flow return
+                        $transactionLocalDB = PPMFWC_Helper_Transaction::getTransaction($orderId);
+                        if (!$transactionLocalDB || empty($transactionLocalDB['order_id'])) {
+                            throw new PPMFWC_Exception_Notice('Could not find local transaction for order ' . $orderId);
+                        }
+                        $order = new WC_Order($transactionLocalDB['order_id']);
+                        if ($order->get_meta('_created_by') === 'Pay. Parts') {
+                            throw new Exception('PayParts order does not belong to this session');
+                        }
+                    }
+                    if (!$order) {
+                        throw new Exception('Order not found for orderId: ' . $orderId);
+                    }
 
                     $url = self::getOrderReturnUrl($order, $status, $orderStatusId);
 
@@ -1058,7 +1082,7 @@ class PPMFWC_Gateways
         if ($payOrder->isPending() && $action != self::ACTION_PENDING) {
             $exchange->setResponse(false, "Unexpected action ({$action}) for order state pending.");
 
-        } elseif ($payOrder->isCancelled() && $action != self::ACTION_CANCEL) {
+        } elseif ($payOrder->isCancelled() && !in_array($action, [self::ACTION_CANCEL, self::ACTION_FAILURE])) {
             $exchange->setResponse(false, "Unexpected action ({$action}) for order state cancelled.");
 
         }
@@ -1085,7 +1109,7 @@ class PPMFWC_Gateways
 
             self::validateExchange($action, $payOrder, $exchange);
 
-            $order_id = $exchange->getReference();
+            $order_id = $payOrder->getReference();
             $methodId = $payOrder->getPaymentMethod();
 
             PPMFWC_Helper_Data::ppmfwc_payLogger('Exchange', $payOrderId, array('action' => $action, 'wc_order_id' => $order_id, 'methodid' => $methodId));

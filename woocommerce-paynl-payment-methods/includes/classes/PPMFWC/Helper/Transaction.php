@@ -127,10 +127,7 @@ class PPMFWC_Helper_Transaction
         global $wpdb;
 
         $table_name_transactions = $wpdb->prefix . "pay_transactions";
-        $result = $wpdb->get_results(
-            $wpdb->prepare("SELECT * FROM $table_name_transactions WHERE transaction_id = %s", $transactionId),
-            ARRAY_A
-        );
+        $result = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name_transactions WHERE transaction_id = %s", $transactionId), ARRAY_A);
 
         return $result[0] ?? false;
     }
@@ -147,15 +144,24 @@ class PPMFWC_Helper_Transaction
     {
         $transactionId = $payOrder->getOrderId();
 
-        # Retrieve local payment state
+        # Retrieve local transaction
         $transactionLocalDB = self::getTransaction($transactionId);
-        $localTransactionStatus = $transactionLocalDB['status'] ?? '';
+        if (empty($transactionLocalDB)) {
+            $reference = $payOrder->getReference();
+            if (!empty($reference)) {
+                $transactionLocalDB = self::getTransaction($reference);
+                PPMFWC_Helper_Data::ppmfwc_payDebug('Using reference to retrieve WooCom order: ' . $reference);
+            }
+        }
+
         $orderId = $transactionLocalDB['order_id'] ?? null;
 
-        if (empty($transactionLocalDB)) {
+        if (empty($orderId)) {
             PPMFWC_Helper_Data::ppmfwc_payLogger('Notice: Cant find local transaction: ' . $transactionId);
-            $orderId = PPMFWC_Helper_Data::getRequestArg('extra1') ?? null;
+            throw new PPMFWC_Exception_Notice('Pay. order not found');
         }
+
+        $localTransactionStatus = $transactionLocalDB['status'] ?? '';
 
         try {
             $order = new WC_Order($orderId);
@@ -164,16 +170,16 @@ class PPMFWC_Helper_Transaction
             throw new PPMFWC_Exception_Notice('Woocommerce could not find internal order ' . $orderId);
         }
 
+        if ($order->get_meta('_created_by') === 'Pay. Parts') {
+            $order->update_meta_data('transactionId', $transactionId);
+            $order->save();
+        }
+
         PPMFWC_Helper_Data::ppmfwc_payLogger('processTransaction', $transactionId, array($status, $localTransactionStatus, $orderId));
 
         if ($status == $localTransactionStatus) {
             PPMFWC_Helper_Data::ppmfwc_payLogger('processTransaction - status already up-to-date', $transactionId, array('status' => $status));
             throw new PPMFWC_Exception_Notice('Already ' . $status);
-        }
-
-        if (empty($transactionLocalDB)) {
-            PPMFWC_Helper_Data::ppmfwc_payLogger('processTransaction', $orderId, array($status, $localTransactionStatus));
-            PPMFWC_Helper_Transaction::newTransaction($transactionId, $methodId ?? 0, ($order->get_total() * 100), $orderId, 'start-data');
         }
 
         $transactionPaid = array($payOrder->getAmount());
@@ -185,7 +191,7 @@ class PPMFWC_Helper_Transaction
             if ($localTransactionStatus === PPMFWC_Gateways::STATUS_SUCCESS && $payApiStatus === PPMFWC_Gateways::STATUS_CANCELED) {
                 PPMFWC_Helper_Data::ppmfwc_payLogger('Not changing order status to canceled, order is paid.');
             } else {
-                self::updateStatus($transactionId, $payApiStatus);
+                self::updateStatus($transactionLocalDB['transaction_id'], $payApiStatus);
             }
         }
         $wcOrderStatus = $order->get_status();
